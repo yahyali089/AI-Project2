@@ -15,7 +15,8 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
-
+from util import manhattanDistance
+from game import Directions
 from game import Agent
 from pacman import GameState
 
@@ -109,32 +110,59 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
-    def getAction(self, gameState: GameState):
+    def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
-
         Here are some method calls that might be useful when implementing minimax.
-
         gameState.getLegalActions(agentIndex):
         Returns a list of legal actions for an agent
         agentIndex=0 means Pacman, ghosts are >= 1
-
         gameState.generateSuccessor(agentIndex, action):
         Returns the successor game state after an agent takes an action
-
         gameState.getNumAgents():
         Returns the total number of agents in the game
-
         gameState.isWin():
         Returns whether or not the game state is a winning state
-
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def max_value(state, depth):  # maximizer
 
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state)
+
+            v = -10000000000000000  #-inf
+            for action in state.getLegalActions(0):
+                v = max(v, min_value(state.generateSuccessor(0, action), depth, 1))
+            # print(v)
+            return v
+
+        GhostIndices = [i for i in range(1, gameState.getNumAgents())]
+
+        def min_value(state, depth, ghost):  # minimizer, ghost is the ghost index number
+
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state)
+
+            v = 10000000000000000  #inf
+            for action in state.getLegalActions(ghost):
+                if ghost == GhostIndices[-1]:
+                    v = min(v, max_value(state.generateSuccessor(ghost, action), depth + 1))
+                else:
+                    v = min(v, min_value(state.generateSuccessor(ghost, action), depth, ghost + 1))
+            # print(v)
+            return v
+
+        res = [(action, min_value(gameState.generateSuccessor(0, action), 0, 1)) for action in
+               gameState.getLegalActions(0)]
+        res.sort(key=lambda k: k[1])
+
+        return res[-1][0]
+        #return max_value(gameState, 1)[1]
+
+        util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
