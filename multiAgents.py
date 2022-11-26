@@ -177,5 +177,34 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+        num = gameState.getNumAgents()
+        Score = []
+
+        def Stop(List):
+            return [x for x in List if x != 'Stop']
+
+        def Minimax(Success, Count):
+            if Count >= self.depth*num or Success.isWin() or Success.isLose():
+                return self.evaluationFunction(Success)
+            if Count%num != 0: 
+                sScore = []
+                for s in Stop(Success.getLegalActions(Count%num)):
+                    points = Success.generateSuccessor(Count%num,s)
+                    res = Minimax(points, Count+1)
+                    sScore.append(res)
+                average = sum([ float(x)/len(sScore) for x in sScore])
+                return average
+            else: 
+                res = -1e10
+                for s in Stop(Success.getLegalActions(Count%num)):
+                    points = Success.generateSuccessor(Count%num,s)
+                    res = max(res, Minimax(points, Count+1))
+                    if Count == 0:
+                        Score.append(res)
+                return res
+
+        res = Minimax(gameState, 0);
+        return Stop(gameState.getLegalActions(0))[Score.index(max(Score))]
+
         util.raiseNotDefined()
 
